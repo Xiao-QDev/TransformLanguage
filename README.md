@@ -9,7 +9,7 @@
 TransformLanguage 使用 **Gradle** 进行构建和打包：
 
 1.  **Linux+macOS**：`./gradlew build` Tip: Don't forget!"chmod +x gradlew"
-2.  **Windows构建命令**`./gradlew.bat build`
+2.  **Windows**`./gradlew.bat build`
 
 ---
 
@@ -19,3 +19,4 @@ TransformLanguage 使用 **Gradle** 进行构建和打包：
 ```
 C++ Example: 
   -
+
