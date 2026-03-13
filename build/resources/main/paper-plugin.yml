@@ -1,0 +1,4 @@
+name: TransformLanguage
+version: '0.0.1-BETA<SNAPSHOT>'
+main: org.transformLanguage.TransformLanguage
+api-version: '1.21'
