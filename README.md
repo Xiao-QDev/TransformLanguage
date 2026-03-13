@@ -6,7 +6,7 @@
 
 ## 🏗️ 如何构建
 
-TFL 使用 **Gradle** 进行构建和打包：
+TransformLanguage 使用 **Gradle** 进行构建和打包：
 
 1.  **运行构建命令**：`./gradlew build` (Linux/Mac) 或 `gradlew.bat build` (Windows)
 
