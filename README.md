@@ -51,7 +51,22 @@ chmod +x compile_plugin.sh
 ./compile_plugin.sh
 ```
 
-3. **加载插件**: 将编译好的 `.dll`/`.so` 放到服务器 `java.library.path`
+3. **加载插件**: 将编译好的 `.dll`/`.so` 放到服务器目录
+
+**方式一：自动加载（推荐）**
+```
+服务器/
+└── plugins/
+    └── TransformLanguage/
+        └── plugins/
+            └── my_plugin.dll  ← 放这里，启动时自动加载
+```
+
+**方式二：手动指定**
+```bash
+# 启动时添加 JVM 参数
+java -Djava.library.path=plugins/TransformLanguage/plugins -jar server.jar
+```
 
 ### C++ SDK API
 

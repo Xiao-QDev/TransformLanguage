@@ -1,5 +1,5 @@
 name: TransformLanguage
-version: '0.0.1-BETA<SNAPSHOT>'
+version: 'R0.1-0.0.1-BETA<SNAPSHOT>'
 author: 'Xiao_QDev, hekuo5310'
 description: 'This is a very good plugin'
 load: STARTUP

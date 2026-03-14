@@ -7,11 +7,9 @@
 
 using namespace std;
 
-// 全局上下文
 thread_local JNIEnv* g_env = nullptr;
 thread_local jobject g_player = nullptr;
 
-// Player API
 inline void sendMessage(const string& msg) {
     jclass cls = g_env->FindClass("org/bukkit/entity/Player");
     jmethodID method = g_env->GetMethodID(cls, "sendMessage", "(Ljava/lang/String;)V");
@@ -43,10 +41,10 @@ inline void teleport(double x, double y, double z) {
     g_env->CallBooleanMethod(g_player, tp, loc);
 }
 
-// 命令注册宏
 #define REGISTER_COMMAND(name, func) \
-extern "C" JNIEXPORT void JNICALL Java_org_transformLanguage_CppCommand_##name( \
-    JNIEnv *env, jclass cls, jobject player, jobjectArray args) { \
+extern "C" JNIEXPORT void JNICALL \
+Java_org_transformLanguage_Cpp_CommandBridge_Cpp_0005ftool_executeNative_##name( \
+    JNIEnv *env, jclass cls, jlong funcPtr, jobject player, jobjectArray args) { \
     g_env = env; g_player = player; \
     jsize len = env->GetArrayLength(args); \
     vector<string> vargs; \
@@ -57,6 +55,22 @@ extern "C" JNIEXPORT void JNICALL Java_org_transformLanguage_CppCommand_##name( 
         env->ReleaseStringUTFChars(jstr, cstr); \
     } \
     func(vargs); \
-}
+} \
+\
+static struct __CommandRegistrar_##name { \
+    __CommandRegistrar_##name() { \
+        if (g_env) { \
+            jclass cls = g_env->FindClass("org/transformLanguage/Cpp/Command_0005fBridge/Cpp_0005ftool"); \
+            if (cls) { \
+                jmethodID registerMethod = g_env->GetStaticMethodID(cls, "registerCommand", "(Ljava/lang/String;J)V"); \
+                if (registerMethod) { \
+                    jstring cmdName = g_env->NewStringUTF(#name); \
+                    jlong funcPtr = (jlong)(void*)&func; \
+                    g_env->CallStaticVoidMethod(cls, registerMethod, cmdName, funcPtr); \
+                } \
+            } \
+        } \
+    } \
+} __registrar_##name;
 
 #endif

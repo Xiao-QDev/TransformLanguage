@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Arrays;
 import org.bukkit.entity.Player;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.transformLanguage.Cpp.Command_Bridge.Cpp_tool;
+import org.transformLanguage.JNI.NativeBridge;
 
 public class Commands {
     
@@ -67,6 +69,7 @@ public class Commands {
                         sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl version</gradient> <gray>- Display plugin version.</gray>");
                         sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl transform <mode> <text...></gradient> <gray>- Transform text (upper/lower/reverse).</gray>");
                         sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl test [args...]</gradient> <gray>- Test C++ plugin.</gray>");
+                        sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl plugins</gradient> <gray>- Display loaded C++ plugins.</gray>");
                     }
                     case "version", "ver" -> sendMessage(sender, "<gradient:#FFD700:#FFA900>Plugin Version: </gradient><white>" + plugin.getPluginMeta().getVersion() + "</white>");
                     case "transform" -> {
@@ -89,8 +92,37 @@ public class Commands {
                         }
                     }
                     case "test" -> {
+                        // 检查是否有 C++ 插件加载
+                        String[] registeredCommands = Cpp_tool.getRegisteredCommands();
+                        if (registeredCommands.length == 0) {
+                            sendMessage(sender, "<yellow>⚠ No C++ plugins loaded yet.</yellow>");
+                            sendMessage(sender, "<gray>Please compile and load my_plugin.dll/.so</gray>");
+                            return true;
+                        }
+                        
+                        // 尝试执行 test 命令（如果已注册）
                         String[] cppArgs = Arrays.copyOfRange(args, 1, args.length);
-                        CppCommand.execute("test", sender, cppArgs);
+                        
+                        try {
+                            if (Cpp_tool.isRegistered("test")) {
+                                Cpp_tool.execute("test", sender, cppArgs);
+                            } else {
+                                sendMessage(sender, "<yellow>⚠ 'test' command not registered by any C++ plugin.</yellow>");
+                            }
+                        } catch (Throwable e) {
+                            sendMessage(sender, "<red>C++ command error: " + e.getMessage() + "</red>");
+                        }
+                    }
+                    case "plugins" -> {
+                        String[] loadedPlugins = Cpp_tool.getLoadedPlugins();
+                        if (loadedPlugins.length == 0) {
+                            sendMessage(sender, "<yellow>No C++ plugins loaded.</yellow>");
+                        } else {
+                            sendMessage(sender, "<gold>Loaded C++ Plugins:</gold>");
+                            for (String pluginName : loadedPlugins) {
+                                sendMessage(sender, "<green>  ✓ " + pluginName + "</green>");
+                            }
+                        }
                     }
                     default -> sendMessage(sender, "<red>⚠ No,you entered it wrong.</red>");
                 }
@@ -100,7 +132,7 @@ public class Commands {
             @Override
             public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
                 if (args.length == 1) {
-                    return Arrays.asList("help","?", "version", "ver", "transform", "test");
+                    return Arrays.asList("help","?", "version", "ver", "transform", "test", "plugins");
                 }
                 if (args.length == 2 && args[0].equalsIgnoreCase("transform")) {
                     return Arrays.asList("upper", "lower", "reverse");
