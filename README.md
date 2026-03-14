@@ -1,3 +1,4 @@
+# 牢大好了没啊~QAQ
 #  TransformLanguage |  通译互转
 > **简介**：这是一个基于 **JNI (Java Native Interface)** 技术的 Minecraft Paper 扩展插件。它允许开发者将 C++、Rust 或 Go 编译的原生模块，直接作为插件在服务端运行。(🤔后续可能会加入更多编程语言 或许吧?)
 ---
@@ -19,6 +20,3 @@ TransformLanguage 使用 **Gradle** 进行构建和打包：
 ```
 C++ Example: 
   -
-
-
-# 牢大好了没啊~QAQ
