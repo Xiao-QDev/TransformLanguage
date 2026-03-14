@@ -16,13 +16,12 @@ public final class TransformLanguage extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Commands commands = new Commands(this);
-        commands.register();
+        new Commands(this).register();
         
         new BukkitRunnable() {
             @Override
             public void run() {
-                logBanner();
+                logo();
                 getLogger().info(RESET + "       TransformLanguage Enabled!" + RESET);
                 getLogger().info(RESET + "     Version: " + getPluginMeta().getVersion() + RESET);
                 getLogger().info(RESET +"       JNI Bridge Initializing..." + RESET);
@@ -44,7 +43,7 @@ public final class TransformLanguage extends JavaPlugin {
         getLogger().info(RESET + "          Goodbye!" + RESET);
     }
     
-    private void logBanner() {
+    private void logo() {
         getLogger().info( RESET + "--------------------------------------" + RESET);
         getLogger().info(PINK + "    ████████╗   ███████╗   ██║        " + RESET);
         getLogger().info(PINK1 + "    ╚══██╔══╝   ██╔════╝   ██║        " + RESET);
