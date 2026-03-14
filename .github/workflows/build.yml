@@ -29,21 +29,19 @@ jobs:
           cache: gradle
 
       - name: Fix gradlew permission
-        run: |
-          git update-index --chmod=+x gradlew
-          chmod +x gradlew
+        run: chmod +x gradlew
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: bash gradlew build
 
       - name: Run tests
-        run: ./gradlew test
+        run: bash gradlew test
 
       - name: Package JAR
-        run: ./gradlew jar
+        run: bash gradlew jar
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
