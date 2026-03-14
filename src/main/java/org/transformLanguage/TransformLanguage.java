@@ -17,7 +17,7 @@ public final class TransformLanguage extends JavaPlugin {
     @Override
     public void onEnable() {
         new Commands(this).register();
-        
+
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -25,11 +25,19 @@ public final class TransformLanguage extends JavaPlugin {
                 getLogger().info(RESET + "       TransformLanguage Enabled!" + RESET);
                 getLogger().info(RESET + "     Version: " + getPluginMeta().getVersion() + RESET);
                 getLogger().info(RESET +"       JNI Bridge Initializing..." + RESET);
-                
+
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        getLogger().info(RESET +"✓ JNI Bridge Initialized Successfully!" + RESET);
+                        try {
+                            if (NativeBridge.isLoaded() && NativeBridge.initNative()) {
+                                getLogger().info(RESET +"✓ JNI Bridge Initialized Successfully!" + RESET);
+                            } else {
+                                getLogger().warning("⚠ JNI Bridge failed to initialize");
+                            }
+                        } catch (Throwable e) {
+                            getLogger().severe("✗ JNI Bridge initialization error: " + e.getMessage());
+                        }
                     }
                 }.runTaskLater(TransformLanguage.this, 80L);
             }

@@ -50,7 +50,7 @@ public class Commands {
             
             @Override
             public boolean execute(CommandSender sender, String commandLabel, String[] args) {
-                if (!sender.hasPermission("transformlanguage.admin")) {
+                if (!sender.hasPermission("transformLanguage.admin")) {
                     sendMessage(sender, "<red>❌ You don't have permission to use this command!</red>");
                     return true;
                 }
@@ -65,8 +65,28 @@ public class Commands {
                         sendMessage(sender, "<gradient:#FF00FF:#00FFFF>----------[ Help Message ]----------</gradient>");
                         sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl help</gradient> <gray>- Display command help.</gray>");
                         sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl version</gradient> <gray>- Display plugin version.</gray>");
+                        sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl transform <mode> <text...></gradient> <gray>- Transform text (upper/lower/reverse).</gray>");
                     }
                     case "version", "ver" -> sendMessage(sender, "<gradient:#FFD700:#FFA900>Plugin Version: </gradient><white>" + plugin.getPluginMeta().getVersion() + "</white>");
+                    case "transform" -> {
+                        if (args.length < 3) {
+                            sendMessage(sender, "<red>Usage: /tfl transform <mode> <text...></red>");
+                            sendMessage(sender, "<gray>Modes: upper, lower, reverse</gray>");
+                            return true;
+                        }
+                        try {
+                            if (!NativeBridge.isLoaded()) {
+                                sendMessage(sender, "<red>Native library not loaded</red>");
+                                return true;
+                            }
+                            String mode = args[1];
+                            String text = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+                            String result = NativeBridge.transformText(text, mode);
+                            sendMessage(sender, "<gold>Result: </gold><white>" + result + "</white>");
+                        } catch (Throwable e) {
+                            sendMessage(sender, "<red>Transform failed: " + e.getMessage() + "</red>");
+                        }
+                    }
                     default -> sendMessage(sender, "<red>⚠ No,you entered it wrong.</red>");
                 }
                 return true;
@@ -75,7 +95,10 @@ public class Commands {
             @Override
             public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
                 if (args.length == 1) {
-                    return Arrays.asList("help","?", "version", "ver");
+                    return Arrays.asList("help","?", "version", "ver", "transform");
+                }
+                if (args.length == 2 && args[0].equalsIgnoreCase("transform")) {
+                    return Arrays.asList("upper", "lower", "reverse");
                 }
                 return null;
             }

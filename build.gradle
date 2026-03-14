@@ -45,7 +45,39 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
+task compileCpp {
+    doLast {
+        def os = System.getProperty("os.name").toLowerCase()
+        def libName = os.contains("win") ? "transformlang.dll" : os.contains("mac") ? "libtransformlang.dylib" : "libtransformlang.so"
+        def nativeLib = file("src/main/resources/natives/${libName}")
+
+        if (!nativeLib.exists()) {
+            def msg = """
+================================================
+ERROR: Native library not found!
+Build failed because transform functionality requires native code.
+================================================
+Install compiler and run:
+"""
+            if (os.contains("win")) {
+                msg += "mkdir src\\main\\resources\\natives (if not exists)\n"
+                msg += "g++ -shared -o src/main/resources/natives/${libName} -I\"%JAVA_HOME%/include\" -I\"%JAVA_HOME%/include/win32\" src/main/cpp/native_bridge.cpp\n"
+            } else if (os.contains("mac")) {
+                msg += "mkdir -p src/main/resources/natives\n"
+                msg += "g++ -shared -o src/main/resources/natives/${libName} -I\"\$JAVA_HOME/include\" -I\"\$JAVA_HOME/include/darwin\" src/main/cpp/native_bridge.cpp\n"
+            } else {
+                msg += "mkdir -p src/main/resources/natives\n"
+                msg += "g++ -shared -fPIC -o src/main/resources/natives/${libName} -I\"\$JAVA_HOME/include\" -I\"\$JAVA_HOME/include/linux\" src/main/cpp/native_bridge.cpp\n"
+            }
+            msg += "================================================"
+            throw new GradleException(msg)
+        }
+        println "Native library found: ${libName}"
+    }
+}
+
 processResources {
+    dependsOn compileCpp
     def props = [version: version]
     inputs.properties props
     filteringCharset 'UTF-8'
