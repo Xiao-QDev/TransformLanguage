@@ -1,63 +1,83 @@
 #  TransformLanguage | 通译互转
 
-> **简介**：这是一个基于 **JNI (Java Native Interface)** 技术的 Minecraft Paper 插件。通过 C++ 原生代码实现文本转换功能（大写/小写/反转）。
+> **简介**：这是一个基于 **JNI (Java Native Interface)** 技术的 Minecraft Paper 插件。提供 C++ SDK，让开发者可以用纯 C++ 编写插件，无需处理 JNI 细节。
 
-> **About**: A Minecraft Paper plugin powered by **JNI (Java Native Interface)** with C++ native code for text transformation (upper/lower/reverse).
+> **About**: A Minecraft Paper plugin powered by **JNI (Java Native Interface)** with C++ SDK for writing plugins in pure C++.
 
 ---
 
 ## 功能 | Features
 
-- `/tfl help` - 显示帮助
-- `/tfl version` - 显示版本
-- `/tfl transform <模式> <文本...>` - 文本转换
+- `/tfl transform <模式> <文本...>` - 文本转换（内置示例）
   - `upper` - 转大写
   - `lower` - 转小写
   - `reverse` - 反转文本
-- 支持多字节字符（中文等）
-- JNI 原生性能
+- `/tfl test [args...]` - C++ 插件示例
+- C++ SDK - 用纯 C++ 编写插件
 
-**示例：**
+---
+
+## C++ 插件开发 | C++ Plugin Development
+
+### 快速开始
+
+1. **创建插件文件** `my_plugin.cpp`:
+
+```cpp
+#include "tfl.h"
+
+void myCommand(vector<string> args) {
+    sendMessage("Hello from C++!");
+    sendMessage("Your name: " + getName());
+
+    if (args.size() > 0) {
+        sendMessage("Arg: " + args[0]);
+    }
+}
+
+REGISTER_COMMAND(mycommand, myCommand);
 ```
-/tfl transform upper hello world
-结果: HELLO WORLD
 
-/tfl transform lower HELLO 世界
-结果: hello 世界
+2. **编译插件**:
 
-/tfl transform reverse abc
-结果: cba
+Windows:
+```cmd
+compile_plugin.bat
 ```
 
-注意: reverse 对 emoji 等代理对字符可能显示异常。
+Linux/Mac:
+```bash
+chmod +x compile_plugin.sh
+./compile_plugin.sh
+```
+
+3. **加载插件**: 将编译好的 `.dll`/`.so` 放到服务器 `java.library.path`
+
+### C++ SDK API
+
+**Player 操作:**
+- `sendMessage(string msg)` - 发送消息
+- `string getName()` - 获取玩家名
+- `teleport(double x, double y, double z)` - 传送玩家
+
+**注册命令:**
+- `REGISTER_COMMAND(name, function)` - 注册命令处理函数
 
 ---
 
 ## 如何构建 | Building
 
-### 1. 编译 C++ 原生库
+### 1. 编译原生库（可选）
 
-**方法 1: 使用 CMake（推荐）**
+如果需要 transform 功能，先编译 C++ 代码：
 
-1. 安装 CMake: https://cmake.org/download/
-2. 安装 C++ 编译器（MinGW-w64 或 Visual Studio）
-3. 运行：
-```bash
-mkdir build/cpp
-cd build/cpp
-cmake ../.. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --config Release
-```
-
-**方法 2: 直接使用 g++**
-
-Windows:
+**Windows:**
 ```cmd
 mkdir src\main\resources\natives
 g++ -shared -o src/main/resources/natives/transformlang.dll -I"%JAVA_HOME%/include" -I"%JAVA_HOME%/include/win32" src/main/cpp/native_bridge.cpp
 ```
 
-Linux/Mac:
+**Linux/Mac:**
 ```bash
 mkdir -p src/main/resources/natives
 g++ -shared -fPIC -o src/main/resources/natives/libtransformlang.so -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" src/main/cpp/native_bridge.cpp
@@ -67,62 +87,6 @@ g++ -shared -fPIC -o src/main/resources/natives/libtransformlang.so -I"$JAVA_HOM
 
 **Linux/macOS**: `./gradlew build`
 **Windows**: `gradlew.bat build`
-
-注意：必须先编译 C++ 代码，否则构建会失败。
-
----
-
-## 文件结构 | Project Structure
-
-```
-TransformLanguage/
-├── src/main/java/org/transformLanguage/
-│   ├── TransformLanguage.java      # 主插件类
-│   ├── Commands.java                # 命令处理
-│   └── NativeBridge.java            # JNI 接口
-├── src/main/cpp/
-│   └── native_bridge.cpp            # C++ 实现
-├── CMakeLists.txt                   # CMake 构建配置
-└── build.gradle                     # Gradle 构建配置
-```
-
----
-
-## 开发指南 | Developer Guide
-
-### JNI 接口
-
-**Java 端** (`NativeBridge.java`):
-```java
-public class NativeBridge {
-    public native static boolean initNative();
-    public native static String transformText(String input, String mode);
-}
-```
-
-**C++ 端** (`native_bridge.cpp`):
-```cpp
-JNIEXPORT jstring JNICALL Java_org_transformLanguage_NativeBridge_transformText
-  (JNIEnv *env, jclass cls, jstring input, jstring mode) {
-    // 使用 UTF-16 处理多字节字符
-    const jchar* inputChars = env->GetStringChars(input, nullptr);
-    jsize len = env->GetStringLength(input);
-    std::u16string text(reinterpret_cast<const char16_t*>(inputChars), len);
-
-    // 转换逻辑
-    // ...
-
-    env->ReleaseStringChars(input, inputChars);
-    return env->NewString(reinterpret_cast<const jchar*>(text.c_str()), text.length());
-}
-```
-
-### 关键实现细节
-
-1. **库加载**: 静态块从 jar 资源提取并加载原生库
-2. **错误处理**: 使用 `catch (Throwable)` 捕获 `UnsatisfiedLinkError`
-3. **UTF-16 处理**: 使用 `GetStringChars` 正确处理多字节字符
-4. **构建检查**: 缺少原生库时构建失败
 
 ---
 
