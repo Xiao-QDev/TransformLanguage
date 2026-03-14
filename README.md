@@ -8,7 +8,7 @@
 
 TransformLanguage 使用 **Gradle** 进行构建和打包：
 
-1.  **Linux+macOS**：`./gradlew build` Tip: He yoo! don't forget write the!"chmod +x gradlew"(其实我还没有测试这个构建 谁能帮个忙？)
+1.  **Linux+macOS**：`./gradlew build` Tip: Hey yoo! don't forget write the!"chmod +x gradlew"(其实我还没有测试这个构建 谁能帮个忙？)
 2.  **Windows**`./gradlew.bat build`
 
 ---
