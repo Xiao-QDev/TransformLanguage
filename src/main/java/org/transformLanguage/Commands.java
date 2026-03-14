@@ -66,6 +66,7 @@ public class Commands {
                         sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl help</gradient> <gray>- Display command help.</gray>");
                         sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl version</gradient> <gray>- Display plugin version.</gray>");
                         sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl transform <mode> <text...></gradient> <gray>- Transform text (upper/lower/reverse).</gray>");
+                        sendMessage(sender, "<gradient:#F97316:#EC4899>/tfl test [args...]</gradient> <gray>- Test C++ plugin.</gray>");
                     }
                     case "version", "ver" -> sendMessage(sender, "<gradient:#FFD700:#FFA900>Plugin Version: </gradient><white>" + plugin.getPluginMeta().getVersion() + "</white>");
                     case "transform" -> {
@@ -87,6 +88,10 @@ public class Commands {
                             sendMessage(sender, "<red>Transform failed: " + e.getMessage() + "</red>");
                         }
                     }
+                    case "test" -> {
+                        String[] cppArgs = Arrays.copyOfRange(args, 1, args.length);
+                        CppCommand.execute("test", sender, cppArgs);
+                    }
                     default -> sendMessage(sender, "<red>⚠ No,you entered it wrong.</red>");
                 }
                 return true;
@@ -95,7 +100,7 @@ public class Commands {
             @Override
             public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
                 if (args.length == 1) {
-                    return Arrays.asList("help","?", "version", "ver", "transform");
+                    return Arrays.asList("help","?", "version", "ver", "transform", "test");
                 }
                 if (args.length == 2 && args[0].equalsIgnoreCase("transform")) {
                     return Arrays.asList("upper", "lower", "reverse");
