@@ -21,7 +21,12 @@ public class Cpp_tool {
     }
     
     //注册 C++ 命令（由 C++ 插件通过 JNI 调用）
-    public static native void registerCommand(String commandName, long functionPtr);
+    public static void registerCommand(String commandName, long functionPtr) {
+        commandRegistry.put(commandName, functionPtr);
+        if (plugin != null) {
+            plugin.getLogger().info("✓ Registered C++ command: " + commandName);
+        }
+    }
     
     //执行已注册的 C++ 命令
     public static boolean executeCommand(String commandName, Object playerObject, String[] args) {
@@ -62,21 +67,37 @@ public class Cpp_tool {
             System.err.println("[CommandRegistry] Plugin instance not initialized!");
             return;
         }
-        
+
         try {
-            // 检查 NativeBridge 是否已加载
             if (!NativeBridge.isLoaded()) {
                 plugin.getLogger().warning("⚠ NativeBridge not loaded, some features may not work");
             }
-            
+
             System.load(file.getAbsolutePath());
             plugin.getLogger().info("✓ Loaded C++ plugin: " + file.getName());
-            loadedPlugins.put(file.getName(), file); // 记录已加载的插件
+            loadedPlugins.put(file.getName(), file);
+
+            // 尝试调用常见的注册函数
+            String[] commonCommands = {"test", "help", "info"};
+            for (String cmd : commonCommands) {
+                try {
+                    Class<?> cls = Cpp_tool.class;
+                    java.lang.reflect.Method method = cls.getDeclaredMethod("register_" + cmd);
+                    method.invoke(null);
+                } catch (Exception e) {
+                    // 命令不存在，忽略
+                }
+            }
         } catch (UnsatisfiedLinkError e) {
             plugin.getLogger().severe("✗ Failed to load C++ plugin: " + file.getName());
             plugin.getLogger().severe("  Error: " + e.getMessage());
         }
     }
+
+    // 动态注册函数（由 C++ 生成）
+    private static native void register_test();
+    private static native void register_help();
+    private static native void register_info();
 
     //自动扫描并加载 plugins 目录下的所有 C++ 插件
     public static void loadAllPlugins() {
@@ -136,6 +157,5 @@ public class Cpp_tool {
     }
     
     //执行 C++ 原生函数（JNI 内部使用）
-    // 这个方法会被 C++ 的 REGISTER_COMMAND 宏生成的函数调用
     private static native void executeNative(long funcPtr, Object playerObject, String[] args);
 }
